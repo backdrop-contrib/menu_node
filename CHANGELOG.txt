@@ -1,0 +1,6 @@
+// $Id$
+
+CHANGELOG for Menu Node
+
+08-MAY-2009
+  -- Initial commit. 6.x.1.0 release.
