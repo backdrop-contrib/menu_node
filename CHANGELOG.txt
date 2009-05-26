@@ -2,5 +2,8 @@
 
 CHANGELOG for Menu Node
 
+26-MAY-2009
+  -- #473284 by bae22. We cannot delete before updates, as that breaks the API.
+
 08-MAY-2009
   -- Initial commit. 6.x.1.0 release.

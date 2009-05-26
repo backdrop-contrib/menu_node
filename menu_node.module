@@ -24,14 +24,15 @@ function menu_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'delete') {
     menu_node_delete($node->nid);
   }
-  // Our table only stores foreign keys, so always delete in the case of update/insert.
-  // This catches cases in which menu items are deleted during an update operation, too.
-  else if (!empty($mlid)) {
-    menu_node_delete($node->nid, $mlid);
-  }
-  // If we have a record to insert, then do so now.
-  if ($op != 'delete' && empty($node->menu['delete']) && !empty($mlid)) {
-    menu_node_save($node->nid, $mlid);
+  else {
+    // If we have a record to insert, then do so now.
+    if (empty($node->menu['delete']) && !empty($mlid)) {
+      menu_node_save($node->nid, $mlid);
+    }
+    // If the menu item is being deleted, do so.
+    else {
+      menu_node_delete($node->nid, $mlid);
+    }
   }
 }
 
@@ -333,7 +334,7 @@ function menu_node_delete_form_submit($form, &$form_state) {
 function menu_node_delete_menu_form_submit($form, &$form_state) {
   $menu_name= $form_state['values']['menu_name'];
   $items = menu_node_get_links_by_menu($menu_name);
-  // We pass these individually in case any hook implemenations care.
+  // We pass these individually in case any hook implementations care.
   foreach ($items as $mlid) {
     $nid = menu_node_get_node($mlid, FALSE);
     menu_node_delete($nid, $mlid);
