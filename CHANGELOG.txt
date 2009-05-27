@@ -2,6 +2,9 @@
 
 CHANGELOG for Menu Node
 
+27-MAY-2009
+  -- Creates the 6.x.1.1 release.
+
 26-MAY-2009
   -- #473284 by bae22. We cannot delete before updates, as that breaks the API.
 
