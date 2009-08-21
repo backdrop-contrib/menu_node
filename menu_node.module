@@ -273,14 +273,12 @@ function menu_node_edit_form_submit($form, &$form_state) {
  *   The menu link id.
  */
 function menu_node_save($nid, $mlid, $hook = 'update') {
-  $record = array('nid' => $nid, 'mlid' => $mlid);
   $new = menu_node_exists($nid, $mlid);
+  // We only save if the record does not exist, otherwise, call the update hook.
   if (empty($new)) {
+    $record = array('nid' => $nid, 'mlid' => $mlid);
     drupal_write_record('menu_node', $record);
     $hook = 'insert';
-  }
-  else {
-    drupal_write_record('menu_node', $record, 'nid');
   }
   _menu_node_invoke($nid, $mlid, $hook);
 }

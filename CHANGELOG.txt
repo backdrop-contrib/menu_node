@@ -2,6 +2,12 @@
 
 CHANGELOG for Menu Node
 
+21-AUG-2009
+  -- #526756 by nonsie and keinstein. Fixes duplicate entry error and book module handling.
+  -- Fixes reversed documentation of the API hook arguments.
+  -- Creates the 6.x.1.2 release.
+  -- Requires running update.php.
+
 27-MAY-2009
   -- Creates the 6.x.1.1 release.
 
