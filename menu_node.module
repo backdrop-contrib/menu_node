@@ -273,12 +273,15 @@ function menu_node_edit_form_submit($form, &$form_state) {
  *   The menu link id.
  */
 function menu_node_save($nid, $mlid, $hook = 'update') {
-  $new = menu_node_exists($nid, $mlid);
-  // We only save if the record does not exist, otherwise, call the update hook.
+  $new = menu_node_exists($mlid);
+  $record = array('nid' => $nid, 'mlid' => $mlid);
+  // Save if the record does not exist, otherwise update the existing link
   if (empty($new)) {
-    $record = array('nid' => $nid, 'mlid' => $mlid);
     drupal_write_record('menu_node', $record);
     $hook = 'insert';
+  }
+  else {
+    drupal_write_record('menu_node', $record, 'mlid');
   }
   _menu_node_invoke($nid, $mlid, $hook);
 }
@@ -301,17 +304,15 @@ function _menu_node_invoke($nid, $mlid, $hook) {
 }
 
 /**
- * Check to see if a specific nid/mlid combination exists.
+ * Check to see if a specific mlid exists.
  *
- * @param $nid
- *   The node id.
  * @param $mlid
  *   The menu link id.
  * @return
  *   The count of matches (which should be 1 or 0).
  */
-function menu_node_exists($nid, $mlid) {
-  return db_result(db_query("SELECT COUNT(nid) FROM {menu_node} WHERE nid = %d AND mlid = %d", $nid, $mlid));
+function menu_node_exists($mlid) {
+  return db_result(db_query("SELECT COUNT(mlid) FROM {menu_node} WHERE mlid = %d", $mlid));
 }
 
 /**

@@ -15,7 +15,10 @@ function menu_node_schema() {
     'fields' => array(
       'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
       'mlid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)),
-    'primary key' => array('nid', 'mlid'),
+    'primary key' => array('mlid'),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
   );
   return $schema;
 }
@@ -73,5 +76,29 @@ function menu_node_update_6000() {
       menu_node_delete($data->nid, $data->mlid);
     }
   }
+  return $ret;
+}
+
+/**
+ * Erase bad records from the {menu_node} table.
+ */
+function menu_node_update_6001() {
+  $return = array();
+  $result = db_query("SELECT mn.mlid, mn.nid FROM {menu_node} mn LEFT JOIN {node} n ON mn.nid = n.nid LEFT JOIN {menu_links} ml ON ml.mlid = mn.mlid WHERE n.nid IS NULL OR ml.mlid IS NULL");
+  while ($data = db_fetch_object($result)) {
+    $return[] = update_sql("DELETE FROM {menu_node} WHERE mlid = $data->mlid AND nid = $data->nid");
+  }
+  return $return;
+}
+
+/**
+ * Update to the new schema with only mlid as primary key.
+ */
+function menu_node_update_6002() {
+  $ret = array();
+  db_drop_primary_key($ret, 'menu_node');
+  db_drop_index($ret, 'menu_node', 'nid');
+  db_add_primary_key($ret, 'menu_node', array('mlid'));
+  db_add_index($ret, 'menu_node', 'nid', array('nid'));
   return $ret;
 }

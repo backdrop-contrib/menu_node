@@ -2,6 +2,9 @@
 
 CHANGELOG for Menu Node
 
+31-DEC-2010
+-- #783442 by mgriego, derjochenmeyer. Make mlid the primary key.
+
 14-SEP-2009
   -- #568246 by roboneale. Accoutns for revisions to nodes.
   -- Creates the 6.x.1.3 release.
