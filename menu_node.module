@@ -12,17 +12,24 @@
  * Implements hook_nodeapi().
  */
 function menu_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  $watch = array('insert', 'update', 'delete');
+  $watch = array('insert', 'update', 'delete', 'load');
 
   // Do we care about this node?
   if (!in_array($op, $watch)) {
     return;
   }
 
+  // On delete operations, the menu item may be deleted before this
+  // runs, so ensure we have the data.
+  if ($op == 'load') {
+    // Ensure the menu object is loaded.
+    $node->menu_node_items = menu_node_get_links($node->nid);
+  }
+
   $mlid = (isset($node->menu['mlid'])) ? $node->menu['mlid'] : NULL;
   // If the node is being deleted, remove all records.
   if ($op == 'delete') {
-    menu_node_delete($node->nid);
+    menu_node_delete($node);
   }
   else {
     // If we have a record to insert, then do so now.
@@ -320,10 +327,10 @@ function menu_node_exists($mlid) {
  */
 function menu_node_delete_form_submit($form, &$form_state) {
   $mlid = $form_state['values']['mlid'];
-  $nid = menu_node_get_node($mlid, FALSE);
+  $node = menu_node_get_node($mlid, TRUE);
   // Is this a node item?
-  if (!empty($nid)) {
-    menu_node_delete($nid, $mlid);
+  if (!empty($node)) {
+    menu_node_delete($node);
   }
 }
 
@@ -335,8 +342,8 @@ function menu_node_delete_menu_form_submit($form, &$form_state) {
   $items = menu_node_get_links_by_menu($menu_name);
   // We pass these individually in case any hook implementations care.
   foreach ($items as $mlid) {
-    $nid = menu_node_get_node($mlid, FALSE);
-    menu_node_delete($nid, $mlid);
+    $node = menu_node_get_node($mlid, TRUE);
+    menu_node_delete($node);
   }
 }
 
@@ -346,23 +353,16 @@ function menu_node_delete_menu_form_submit($form, &$form_state) {
  * We deliberately run the hook before the delete, in case any module
  * wishes to run a JOIN on the {menu_node} table.
  *
- * @param $nid
- *   The node id.
- * @param $mlid
- *   The menu link id.
+ * @param $node
+ *   The node being deleted.
  * @return
  *   No return. hook_menu_node_delete() is invoked.
  */
-function menu_node_delete($nid, $mlid = NULL) {
-  if (!empty($mlid)) {
-    _menu_node_invoke($nid, $mlid, 'delete');
-    db_query("DELETE FROM {menu_node} WHERE nid = %d AND mlid = %d", $nid, $mlid);
-    return;
+function menu_node_delete($node) {
+  if (!empty($node->menu_node_items)) {
+    foreach ($node->menu_node_items as $item) {
+      module_invoke_all('menu_node_delete', $item, $node);
+    }
   }
-  $result = db_query("SELECT mlid FROM {menu_node} WHERE nid = %d", $nid);
-  while($data = db_fetch_object($result)) {
-    _menu_node_invoke($nid, $data->mlid, 'delete');
-    // Run the deletes one at a time, to perserve accurate JOINs.
-    db_query("DELETE FROM {menu_node} WHERE nid = %d AND mlid = %d", $nid, $data->mlid);
-  }
+  db_query("DELETE FROM {menu_node} WHERE nid = %d", $node->nid);
 }
