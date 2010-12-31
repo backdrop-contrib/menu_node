@@ -19,22 +19,12 @@ function menu_node_schema() {
     'indexes' => array(
       'nid' => array('nid'),
     ),
+    'foreign_keys' => array(
+      'nid' => array('node' => 'nid'),
+      'mlid' => array('node' => 'nid'),
+    ),
   );
   return $schema;
-}
-
-/**
- * Implements hook_install().
- */
-function menu_node_install() {
-  drupal_install_schema('menu_node');
-}
-
-/**
- * Implements hook_uninstall()
- */
-function menu_node_uninstall() {
-  drupal_uninstall_schema('menu_node');
 }
 
 /**

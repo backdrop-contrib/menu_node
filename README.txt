@@ -91,7 +91,7 @@ Doxygen comments for details.
 ----
 6. The {menu_node} Table
 
-The {menu_node} table is deliberately simple. It contains a dual primary-key
+The {menu_node} table is deliberately simple. It contains a primary key
 and two columns:
 
   -- nid
@@ -99,5 +99,5 @@ and two columns:
   Foreign key to the {node} table.
   
   -- mlid
-  Integer, unsigned
+  Primary key. Integer, unsigned.
   Foreigh key to the {menu_links} table.
