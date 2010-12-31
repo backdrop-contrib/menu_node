@@ -21,7 +21,7 @@ function menu_node_schema() {
     ),
     'foreign_keys' => array(
       'nid' => array('node' => 'nid'),
-      'mlid' => array('node' => 'nid'),
+      'mlid' => array('menu_links' => 'mlid'),
     ),
   );
   return $schema;
