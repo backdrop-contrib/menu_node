@@ -6,7 +6,7 @@ CHANGELOG for Menu Node
 -- #783442 by mgriego, derjochenmeyer. Make mlid the primary key.
 -- #882326. Fixes problem with delete hook passing partial node object.
 -- Creates the 6.x.1.4 release.
--- Creates the 6.x.1 branch.
+-- Creates the bugfix-only DRUPAL-6 branch.
 
 14-SEP-2009
   -- #568246 by roboneale. Accoutns for revisions to nodes.
