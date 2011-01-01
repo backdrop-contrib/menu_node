@@ -9,42 +9,61 @@
  */
 
 /**
- * Implements hook_nodeapi().
+ * Implements hook_menu_link_insert().
  */
-function menu_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  $watch = array('insert', 'update', 'delete', 'load');
-
-  // Do we care about this node?
-  if (!in_array($op, $watch)) {
+function menu_node_menu_link_insert($link) {
+  if ($link['router_path'] != 'node/%' || !isset($link['mlid'])) {
     return;
   }
-
-  // On delete operations, the menu item may be deleted before this
-  // runs, so ensure we have the data.
-  if ($op == 'load') {
-    // Ensure the menu object is loaded.
-    $node->menu_node_items = menu_node_get_links($node->nid);
-  }
-
-  $mlid = (isset($node->menu['mlid'])) ? $node->menu['mlid'] : NULL;
-  // If the node is being deleted, remove all records.
-  if ($op == 'delete') {
-    menu_node_delete_record($node);
-  }
-  else {
-    // If we have a record to insert, then do so now.
-    if (empty($node->menu['delete']) && !empty($mlid)) {
-      menu_node_save_record($node->nid, $mlid);
-    }
-    // If the menu item is being deleted, do so.
-    else if (!empty($mlid)) {
-      menu_node_delete_record($node->nid, $mlid);
-    }
+  $nid = str_replace('node/', '', $link['link_path']);
+  if ($node = node_load($nid)) {
+    menu_node_record_save($node->nid, $link['mlid']);
   }
 }
 
 /**
+ * Implements hook_menu_link_update().
+ */
+function menu_node_menu_link_update($link) {
+  if ($node = menu_node_get_node($link['mlid'])) {
+    menu_node_record_save($node->nid, $link['mlid']);
+  }
+}
+
+/**
+ * Implements hook_menu_link_delete().
+ */
+function menu_node_menu_link_delete($link) {
+  if ($node = menu_node_get_node($link['mlid'])) {
+    menu_node_record_delete($node);
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ */
+function menu_node_node_load($nodes, $types) {
+  if (!is_array($nodes)) {
+    return;
+  }
+  // TODO: Optimize for multiple nodes.
+  foreach($nodes as $node) {
+    // Ensure the menu object is loaded.
+    $node->menu_node_items = menu_node_get_links($node->nid);
+  }
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function menu_node_node_delete($node) {
+  menu_node_record_delete($node);
+}
+
+/**
  * Get the relevant node object for a menu item.
+ *
+ * This lookup function should be run for update and delete operations.
  *
  * @param $mlid
  *   The menu link id.
@@ -54,7 +73,7 @@ function menu_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
  *   A node id, a complete node object or FALSE on failure.
  */
 function menu_node_get_node($mlid, $load = TRUE) {
-  $nid = db_result(db_query("SELECT n.nid FROM {node} n INNER JOIN {menu_node} mn ON n.nid = mn.nid WHERE mn.mlid = %d", $mlid));
+  $nid = db_query("SELECT n.nid FROM {node} n INNER JOIN {menu_node} mn ON n.nid = mn.nid WHERE mn.mlid = :mlid", array(':mlid' => $mlid))->fetchField();
   if (empty($nid)) {
     return FALSE;
   }
@@ -66,6 +85,7 @@ function menu_node_get_node($mlid, $load = TRUE) {
 
 /**
  * Get the relevant menu links for a node.
+ *
  * @param $nid
  *   The node id.
  * @param $router
@@ -75,11 +95,11 @@ function menu_node_get_node($mlid, $load = TRUE) {
  *   An array of complete menu_link objects or an empy array on failure.
  */
 function menu_node_get_links($nid, $router = FALSE) {
-  $result = db_query("SELECT * FROM {menu_links} WHERE link_path = '%s'", 'node/'. $nid);
+  $result = db_query("SELECT * FROM {menu_links} WHERE link_path = :link_path", array(':link_path' => 'node/' . $nid));
   $items = array();
-  while ($data = db_fetch_object($result)) {
+  foreach ($result as $data) {
     if ($router) {
-      $data->menu_router = menu_get_item('node/'. $nid);
+      $data->menu_router = menu_get_item('node/' . $nid);
     }
     $items[$data->mlid] = $data;
   }
@@ -96,8 +116,8 @@ function menu_node_get_links($nid, $router = FALSE) {
  */
 function menu_node_get_links_by_menu($menu_name) {
   $links = array();
-  $result = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = '%s'", $menu_name);
-  while ($data = db_fetch_object($result)) {
+  $result = db_query("SELECT mlid FROM {menu_links} WHERE menu_name = :menu_name", array(':menu_name' => $menu_name));
+  foreach ($result as $data) {
     $links[] = $data->mlid;
   }
   return $links;
@@ -116,8 +136,8 @@ function menu_node_get_links_by_menu($menu_name) {
  */
 function menu_node_get_nodes_by_menu($menu_name, $load = FALSE) {
   $links = array();
-  $result = db_query("SELECT mn.nid FROM {menu_node} mn INNER JOIN {menu_links} ml ON mn.mlid = ml.mlid WHERE ml.menu_name = '%s'", $menu_name);
-  while ($data = db_fetch_object($result)) {
+  $result = db_query("SELECT mn.nid FROM {menu_node} mn INNER JOIN {menu_links} ml ON mn.mlid = ml.mlid WHERE ml.menu_name = :menu_name", array(':menu_name' => $menu_name));
+  foreach ($result as $data) {
     if ($load) {
       $nodes[$data->nid] = node_load($data->nid);
     }
@@ -151,7 +171,10 @@ function menu_node_get_nodes_by_menu($menu_name, $load = FALSE) {
  *   A nested array of menu data.
  */
 function menu_node_tree($tree, $menu = NULL, $filter = array(), $options = array()) {
-  $options += array('marker' => '-', 'spacer' => ' ');
+  $options += array(
+    'marker' => '-',
+    'spacer' => ' ',
+  );
   $data = array();
   if (!empty($menu)) {
     _menu_node_tree($data, $menu, $value, $filter, $options['marker'], $options['spacer']);
@@ -218,54 +241,10 @@ function _menu_node_tree(&$tree, $menu, $data, $parents, $marker = NULL, $spacer
  */
 function menu_node_get_parent($item, $return = 'title') {
   if ($return == 'title') {
-    return db_result(db_query("SELECT link_title FROM {menu_links} WHERE mlid = %d", $item['p1']));
+    return db_query("SELECT link_title FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $item['p1']))->fetchField();
   }
-  $path = db_result(db_query("SELECT link_path FROM {menu_links} WHERE mlid = %d", $item['p1']));
+  $path = db_query("SELECT link_path FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $item['p1']))->fetchField();
   return menu_get_item($path);
-}
-
-/**
- * Implements hook_form_alter().
- *
- * React to the editing of custom menu items.
- */
-function menu_node_form_menu_edit_item_alter(&$form, $form_state) {
-  $form['#submit'][] = 'menu_node_edit_form_submit';
-}
-
-/**
- * Implements hook_form_alter().
- *
- * React to the deletion of custom menu items.
- */
-function menu_node_form_menu_item_delete_form_alter(&$form, $form_state) {
-  $form['mlid'] = array('#type' => 'value', '#value' => $form['#item']['mlid']);
-  $form['#submit'][] = 'menu_node_delete_record_form_submit';
-  // Our submit _must_ be run first.
-  $form['#submit'] = array_reverse($form['#submit']);
-}
-
-/**
- * Implements hook_form_alter().
- *
- * React to the deletion of entire menus.
- */
-function menu_node_form_menu_delete_menu_confirm_alter(&$form, $form_state) {
-  $form['menu_name'] = array('#type' => 'value', '#value' => $form['#menu']['menu_name']);
-  $form['#submit'][] = 'menu_node_delete_record_menu_form_submit';
-  // Our submit _must_ be run first.
-  $form['#submit'] = array_reverse($form['#submit']);
-}
-
-/**
- * Custom form handler to react to menu changes.
- */
-function menu_node_edit_form_submit($form, &$form_state) {
-  $menu = $form_state['values']['menu'];
-  // Is this a node item?
-  if (count($menu['parts']) == 2 && $menu['parts'][0] = 'node' && is_numeric($menu['parts'][1])) {
-    menu_node_save_record($menu['parts'][1], $menu['mlid']);
-  }
 }
 
 /**
@@ -279,9 +258,12 @@ function menu_node_edit_form_submit($form, &$form_state) {
  * @param $mlid
  *   The menu link id.
  */
-function menu_node_save_record($nid, $mlid, $hook = 'update') {
+function menu_node_record_save($nid, $mlid, $hook = 'update') {
   $new = menu_node_exists($mlid);
-  $record = array('nid' => $nid, 'mlid' => $mlid);
+  $record = array(
+    'nid' => $nid,
+    'mlid' => $mlid,
+  );
   // Save if the record does not exist, otherwise update the existing link
   if (empty($new)) {
     drupal_write_record('menu_node', $record);
@@ -307,7 +289,7 @@ function _menu_node_invoke($nid, $mlid, $hook) {
   // Use our internal lookup fuinctions.
   $node = menu_node_get_node($mlid);
   $items = menu_node_get_links($nid);
-  module_invoke_all('menu_node_'. $hook, $items[$mlid], $node);
+  module_invoke_all('menu_node_' . $hook, $items[$mlid], $node);
 }
 
 /**
@@ -319,36 +301,11 @@ function _menu_node_invoke($nid, $mlid, $hook) {
  *   The count of matches (which should be 1 or 0).
  */
 function menu_node_exists($mlid) {
-  return db_result(db_query("SELECT COUNT(mlid) FROM {menu_node} WHERE mlid = %d", $mlid));
+  return (bool) db_query("SELECT COUNT(mlid) FROM {menu_node} WHERE mlid = :mlid", array(':mlid' => $mlid))->fetchField();
 }
 
 /**
- * Custom form handler to react to menu item changes.
- */
-function menu_node_delete_record_form_submit($form, &$form_state) {
-  $mlid = $form_state['values']['mlid'];
-  $node = menu_node_get_node($mlid, TRUE);
-  // Is this a node item?
-  if (!empty($node)) {
-    menu_node_delete_record($node);
-  }
-}
-
-/**
- * Custom form handler to react to custom menu changes.
- */
-function menu_node_delete_record_menu_form_submit($form, &$form_state) {
-  $menu_name= $form_state['values']['menu_name'];
-  $items = menu_node_get_links_by_menu($menu_name);
-  // We pass these individually in case any hook implementations care.
-  foreach ($items as $mlid) {
-    $node = menu_node_get_node($mlid, TRUE);
-    menu_node_delete_record($node);
-  }
-}
-
-/**
- * Delete a record from {menu_node} and run hook_menu_node_delete_record().
+ * Delete a record from {menu_node} and run hook_menu_node_record_delete().
  *
  * We deliberately run the hook before the delete, in case any module
  * wishes to run a JOIN on the {menu_node} table.
@@ -356,13 +313,16 @@ function menu_node_delete_record_menu_form_submit($form, &$form_state) {
  * @param $node
  *   The node being deleted.
  * @return
- *   No return. hook_menu_node_delete_record() is invoked.
+ *   No return. hook_menu_node_record_delete() is invoked.
  */
-function menu_node_delete_record($node) {
+function menu_node_record_delete($node) {
   if (!empty($node->menu_node_items)) {
     foreach ($node->menu_node_items as $item) {
-      module_invoke_all('menu_node_delete_record', $item, $node);
+      module_invoke_all('menu_node_record_delete', $item, $node);
     }
   }
-  db_query("DELETE FROM {menu_node} WHERE nid = %d", $node->nid);
+  // Now delete the record.
+  db_delete('menu_node')
+    ->condition('nid', $node->nid)
+    ->execute();
 }

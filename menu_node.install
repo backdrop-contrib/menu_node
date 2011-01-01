@@ -13,8 +13,19 @@
 function menu_node_schema() {
   $schema['menu_node'] = array(
     'fields' => array(
-      'nid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'mlid' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0)),
+      'nid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'mlid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
     'primary key' => array('mlid'),
     'indexes' => array(
       'nid' => array('nid'),
@@ -34,14 +45,18 @@ function menu_node_schema() {
  * based on existing menu items.
  */
 function menu_node_enable() {
-  $items = array();
-  $result = db_query("SELECT ml.mlid, ml.link_path FROM {menu_links} ml INNER JOIN {menu_custom} mc ON ml.menu_name = mc.menu_name WHERE ml.link_path LIKE 'node/%' AND ml.router_path = 'node/%%'");
-  while ($data = db_fetch_object($result)) {
+  $result = db_query("SELECT ml.mlid, ml.link_path FROM {menu_links} ml INNER JOIN {menu_custom} mc ON ml.menu_name = mc.menu_name WHERE ml.link_path <> 'node/%' AND ml.router_path = 'node/%'");
+  foreach ($result as $data) {
     $nid = str_replace('node/', '', $data->link_path);
     // Ensure that we did not grab any bad links accidentally.
-    $check = (bool) db_result(db_query("SELECT COUNT(*) FROM {node} WHERE nid = %d", $nid));
+    $check = (bool) db_query("SELECT COUNT(*) FROM {node} WHERE nid = :nid", array(':nid' => $nid))->fetchField();
     if ($check) {
-      db_query("INSERT INTO {menu_node} (nid, mlid) VALUES (%d, %d)", $nid, $data->mlid);
+      db_insert('menu_node')
+        ->fields(array(
+          'nid' => $nid,
+          'mlid' => $data->mlid,
+        ))
+        ->execute();
     }
   }
 }
@@ -52,7 +67,8 @@ function menu_node_enable() {
  * On module disable, erase the {menu_node} table.
  */
 function menu_node_disable() {
-  db_query("DELETE FROM {menu_node}");
+  db_delete('menu_node')
+    ->execute();
 }
 
 /**
@@ -62,11 +78,11 @@ function menu_node_update_6000() {
   $ret = array();
   if (module_exists('book')) {
     $result = db_query("SELECT mlid, nid FROM {book}");
-    while ($data = db_fetch_object($result)) {
+    foreach ($result as $data) {
       menu_node_delete($data->nid, $data->mlid);
     }
   }
-  return $ret;
+  return t('Removed book data from the {menu_node} table.') /* $ret */;
 }
 
 /**
@@ -75,10 +91,13 @@ function menu_node_update_6000() {
 function menu_node_update_6001() {
   $return = array();
   $result = db_query("SELECT mn.mlid, mn.nid FROM {menu_node} mn LEFT JOIN {node} n ON mn.nid = n.nid LEFT JOIN {menu_links} ml ON ml.mlid = mn.mlid WHERE n.nid IS NULL OR ml.mlid IS NULL");
-  while ($data = db_fetch_object($result)) {
-    $return[] = update_sql("DELETE FROM {menu_node} WHERE mlid = $data->mlid AND nid = $data->nid");
+  foreach ($result as $data) {
+    db_delete('menu_node')
+      ->condition('mlid', $data->mild)
+      ->condition('nid', $data->nid)
+      ->execute();
   }
-  return $return;
+  return t('Erased bad records from the {menu_node} table.') /* $return */;
 }
 
 /**
@@ -86,9 +105,9 @@ function menu_node_update_6001() {
  */
 function menu_node_update_6002() {
   $ret = array();
-  db_drop_primary_key($ret, 'menu_node');
-  db_drop_index($ret, 'menu_node', 'nid');
-  db_add_primary_key($ret, 'menu_node', array('mlid'));
-  db_add_index($ret, 'menu_node', 'nid', array('nid'));
-  return $ret;
+  db_drop_primary_key('menu_node');
+  db_drop_index('menu_node', 'nid');
+  db_add_primary_key('menu_node', array('mlid'));
+  db_add_index('menu_node', 'nid', array('nid'));
+  return t('Updated primary key and indeces for {menu_node}') /* $ret */;
 }
