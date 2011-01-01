@@ -318,7 +318,7 @@ function menu_node_exists($mlid) {
 function menu_node_record_delete($node) {
   if (!empty($node->menu_node_items)) {
     foreach ($node->menu_node_items as $item) {
-      module_invoke_all('menu_node_record_delete', $item, $node);
+      module_invoke_all('menu_node_delete', $item, $node);
     }
   }
   // Now delete the record.

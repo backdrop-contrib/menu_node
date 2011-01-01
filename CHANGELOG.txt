@@ -5,6 +5,7 @@ CHANGELOG for Menu Node
 01-JAN-2010
 -- #1011782. Major D7 upgrade, thanks to Coder module.
 -- Needs tests, and then we can release.
+-- Most tests working. Needs help on delete.
 
 31-DEC-2010
 -- #783442 by mgriego, derjochenmeyer. Make mlid the primary key.
