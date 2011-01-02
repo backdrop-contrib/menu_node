@@ -35,6 +35,8 @@ function menu_node_menu_link_update($link) {
  */
 function menu_node_menu_link_delete($link) {
   if ($node = menu_node_get_node($link['mlid'])) {
+    // TODO: If http://drupal.org/node/1012768 doesn't get it,
+    // then we must attach the $item to the node.
     menu_node_record_delete($node);
   }
 }
@@ -69,16 +71,19 @@ function menu_node_node_delete($node) {
  *   The menu link id.
  * @param $load
  *   Boolean value that indicates whether to return the node id or a full $node.
+ * @param $reset
+ *   Boolean value that indicates whether to reset the static node_load() cache.
  * @return
  *   A node id, a complete node object or FALSE on failure.
  */
-function menu_node_get_node($mlid, $load = TRUE) {
+function menu_node_get_node($mlid, $load = TRUE, $reset = FALSE) {
   $nid = db_query("SELECT n.nid FROM {node} n INNER JOIN {menu_node} mn ON n.nid = mn.nid WHERE mn.mlid = :mlid", array(':mlid' => $mlid))->fetchField();
   if (empty($nid)) {
     return FALSE;
   }
   if ($load) {
-    return node_load($nid);
+    // We must be sure to refresh the static cache in node_load().
+    return node_load($nid, NULL, $reset);
   }
   return $nid;
 }

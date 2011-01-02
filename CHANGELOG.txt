@@ -2,6 +2,9 @@
 
 CHANGELOG for Menu Node
 
+02-JAN-2010
+-- Better testing. Finds http://drupal.org/node/1012768 bug.
+
 01-JAN-2010
 -- #1011782. Major D7 upgrade, thanks to Coder module.
 -- Needs tests, and then we can release.
