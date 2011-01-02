@@ -28,10 +28,11 @@ function menu_node_test_get() {
  * Implements hook_menu_node_insert().
  */
 function menu_node_test_menu_node_insert($link, $node) {
-  static $i;
+  // On insert, increment the count and set a static indicator, so we
+  // can count how many times this operation has run.
+  $i = &drupal_static(__FUNCTION__);
   if (!empty($link) && !empty($node)) {
-    $i++;
-    menu_node_test_set($i);
+    menu_node_test_set('insert' . $i++);
   }
 }
 
@@ -39,8 +40,9 @@ function menu_node_test_menu_node_insert($link, $node) {
  * Implements hook_menu_node_delete().
  */
 function menu_node_test_menu_node_delete($link, $node) {
+  $i = &drupal_static(__FUNCTION__);
   if (!empty($link) && !empty($node)) {
-    menu_node_test_set('delete');
+    menu_node_test_set('delete' . $i++);
   }
 }
 
@@ -48,7 +50,8 @@ function menu_node_test_menu_node_delete($link, $node) {
  * Implements hook_menu_node_update().
  */
 function menu_node_test_menu_node_update($link, $node) {
+  $i = &drupal_static(__FUNCTION__);
   if (!empty($link) && !empty($node)) {
-    menu_node_test_set('update');
+    menu_node_test_set('update' . $i++);
   }
 }

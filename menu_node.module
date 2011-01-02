@@ -312,12 +312,13 @@ function menu_node_record_save($node, $link, $hook = 'update') {
  */
 function _menu_node_invoke($node, $link, $hook) {
   // It is possible that this function will try to fire for both the node and menu
-  // hooks. So we static cache the nid and only fire once per node per operation.
-  static $nids;
-  if (isset($nids[$hook][$node->nid])) {
+  // hooks. So we static cache the nid and only fire once per link per node
+  // operation. Note that mlid is the primary key of our table.
+  static $ids;
+  if (isset($ids[$hook][$node->nid][$link->mlid])) {
     return;
   }
-  $nids[$hook][$node->nid] = TRUE;
+  $ids[$hook][$node->nid][$link->mlid] = TRUE;
   module_invoke_all('menu_node_' . $hook, $link, $node);
 }
 

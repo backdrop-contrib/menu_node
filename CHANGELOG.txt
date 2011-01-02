@@ -7,6 +7,7 @@ CHANGELOG for Menu Node
 -- Changes $items to $links in most cases.
 -- Fixes all tests, pending #1012768.
 -- Adds API documentation file.
+-- Corrects static key handling and adds tests for multuple menu items for a single node.
 
 01-JAN-2010
 -- #1011782. Major D7 upgrade, thanks to Coder module.
