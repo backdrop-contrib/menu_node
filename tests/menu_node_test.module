@@ -43,3 +43,12 @@ function menu_node_test_menu_node_delete($link, $node) {
     menu_node_test_set('delete');
   }
 }
+
+/**
+ * Implements hook_menu_node_update().
+ */
+function menu_node_test_menu_node_update($link, $node) {
+  if (!empty($link) && !empty($node)) {
+    menu_node_test_set('update');
+  }
+}

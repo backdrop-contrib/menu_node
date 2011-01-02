@@ -73,8 +73,8 @@ the same arguments:
 These functions pass the arguments:
 
   -- $link
-  The menu link (taken from the {menu_links} table) being
-  acted upon.
+  The menu link being acted upon. (Taken from the {menu_links} table as an
+  object).
   -- $node
   The complete node object being acted upon.
 

@@ -17,7 +17,7 @@ function menu_node_menu_link_insert($link) {
   }
   $nid = str_replace('node/', '', $link['link_path']);
   if ($node = node_load($nid)) {
-    menu_node_record_save($node->nid, $link['mlid']);
+    menu_node_record_save($node, $link);
   }
 }
 
@@ -26,7 +26,7 @@ function menu_node_menu_link_insert($link) {
  */
 function menu_node_menu_link_update($link) {
   if ($node = menu_node_get_node($link['mlid'])) {
-    menu_node_record_save($node->nid, $link['mlid']);
+    menu_node_record_save($node, $link);
   }
 }
 
@@ -37,8 +37,7 @@ function menu_node_menu_link_delete($link) {
   if ($node = menu_node_get_node($link['mlid'])) {
     // TODO: If http://drupal.org/node/1012768 doesn't get in,
     // then we must attach the $link to the node.
-    /* For now, we can fake it.
-    if (empty($node->menu_node_links)) {
+    /*if (empty($node->menu_node_links)) {
       $node->menu_node_links[] = $link;
     }*/
     menu_node_record_delete($node);
@@ -56,6 +55,21 @@ function menu_node_node_load($nodes, $types) {
   foreach($nodes as $node) {
     // Ensure the menu object is loaded.
     $node->menu_node_links = menu_node_get_links($node->nid);
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ *
+ * It is possible that a node save does not trigger a menu change,
+ * and other module may wish to be informed that the node data
+ * has been updated. So do so here.
+ */
+function menu_node_node_update($node) {
+  if (!empty($node->menu_node_links)) {
+    foreach ($node->menu_node_links as $link) {
+      _menu_node_invoke($node, $link, 'update');
+    }
   }
 }
 
@@ -262,16 +276,18 @@ function menu_node_get_parent($item, $return = 'title') {
  * After saving, we fire the appropriate menu_node hook,
  * either 'insert' or 'update'.
  *
- * @param $nid
- *   The node id.
- * @param $mlid
- *   The menu link id.
+ * @param $node
+ *   The node being saved.
+ * @param $link
+ *   The menu link being saved.
  */
-function menu_node_record_save($nid, $mlid, $hook = 'update') {
-  $new = menu_node_exists($mlid);
+function menu_node_record_save($node, $link, $hook = 'update') {
+  // Our internal API uses $link as an object, not an array.
+  $link = (object) $link;
+  $new = menu_node_exists($link->mlid);
   $record = array(
-    'nid' => $nid,
-    'mlid' => $mlid,
+    'nid' => $node->nid,
+    'mlid' => $link->mlid,
   );
   // Save if the record does not exist, otherwise update the existing link
   if (empty($new)) {
@@ -281,24 +297,28 @@ function menu_node_record_save($nid, $mlid, $hook = 'update') {
   else {
     drupal_write_record('menu_node', $record, 'mlid');
   }
-  _menu_node_invoke($nid, $mlid, $hook);
+  _menu_node_invoke($node, $link, $hook);
 }
 
 /**
  * Wrapper function for module hooks.
  *
- * @param $nid
- *   The node id.
- * @param $mlid
- *   The menu link id.
+ * @param $node
+ *   The node being saved.
+ * @param $link
+ *   The menu link being saved.
  * @param $hook
  *   The hook to invoke ('insert', 'update', or 'delete').
  */
-function _menu_node_invoke($nid, $mlid, $hook) {
-  // Use our internal lookup fuinctions.
-  $node = menu_node_get_node($mlid);
-  $links = menu_node_get_links($nid);
-  module_invoke_all('menu_node_' . $hook, $links[$mlid], $node);
+function _menu_node_invoke($node, $link, $hook) {
+  // It is possible that this function will try to fire for both the node and menu
+  // hooks. So we static cache the nid and only fire once per node per operation.
+  static $nids;
+  if (isset($nids[$hook][$node->nid])) {
+    return;
+  }
+  $nids[$hook][$node->nid] = TRUE;
+  module_invoke_all('menu_node_' . $hook, $link, $node);
 }
 
 /**
@@ -327,7 +347,7 @@ function menu_node_exists($mlid) {
 function menu_node_record_delete($node) {
   if (!empty($node->menu_node_links)) {
     foreach ($node->menu_node_links as $link) {
-      module_invoke_all('menu_node_delete', $link, $node);
+      _menu_node_invoke($node, $link, 'delete');
     }
   }
   // Now delete the record.
