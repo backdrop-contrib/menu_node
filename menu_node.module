@@ -35,8 +35,12 @@ function menu_node_menu_link_update($link) {
  */
 function menu_node_menu_link_delete($link) {
   if ($node = menu_node_get_node($link['mlid'])) {
-    // TODO: If http://drupal.org/node/1012768 doesn't get it,
-    // then we must attach the $item to the node.
+    // TODO: If http://drupal.org/node/1012768 doesn't get in,
+    // then we must attach the $link to the node.
+    /* For now, we can fake it.
+    if (empty($node->menu_node_links)) {
+      $node->menu_node_links[] = $link;
+    }*/
     menu_node_record_delete($node);
   }
 }
@@ -51,7 +55,7 @@ function menu_node_node_load($nodes, $types) {
   // TODO: Optimize for multiple nodes.
   foreach($nodes as $node) {
     // Ensure the menu object is loaded.
-    $node->menu_node_items = menu_node_get_links($node->nid);
+    $node->menu_node_links = menu_node_get_links($node->nid);
   }
 }
 
@@ -63,7 +67,7 @@ function menu_node_node_delete($node) {
 }
 
 /**
- * Get the relevant node object for a menu item.
+ * Get the relevant node object for a menu link.
  *
  * This lookup function should be run for update and delete operations.
  *
@@ -94,7 +98,7 @@ function menu_node_get_node($mlid, $load = TRUE, $reset = FALSE) {
  * @param $nid
  *   The node id.
  * @param $router
- *   Boolean flag indicating whether to attach the menu router item to the $item object.
+ *   Boolean flag indicating whether to attach the menu router link to the $item object.
  *   If set to TRUE, the router will be set as $item->menu_router.
  * @return
  *   An array of complete menu_link objects or an empy array on failure.
@@ -196,7 +200,7 @@ function menu_node_tree($tree, $menu = NULL, $filter = array(), $options = array
 /**
  * A private recursive sort function.
  *
- * Given a menu tree, return its child node items.
+ * Given a menu tree, return its child node links.
  *
  * @param $tree
  *   The recursive tree data.
@@ -233,7 +237,7 @@ function _menu_node_tree(&$tree, $menu, $data, $parents, $marker = NULL, $spacer
 }
 
 /**
- * Return the parent item of a menu element.
+ * Return the parent link of a menu element.
  *
  * @param $item
  *   The menu item.
@@ -293,8 +297,8 @@ function menu_node_record_save($nid, $mlid, $hook = 'update') {
 function _menu_node_invoke($nid, $mlid, $hook) {
   // Use our internal lookup fuinctions.
   $node = menu_node_get_node($mlid);
-  $items = menu_node_get_links($nid);
-  module_invoke_all('menu_node_' . $hook, $items[$mlid], $node);
+  $links = menu_node_get_links($nid);
+  module_invoke_all('menu_node_' . $hook, $links[$mlid], $node);
 }
 
 /**
@@ -321,9 +325,9 @@ function menu_node_exists($mlid) {
  *   No return. hook_menu_node_record_delete() is invoked.
  */
 function menu_node_record_delete($node) {
-  if (!empty($node->menu_node_items)) {
-    foreach ($node->menu_node_items as $item) {
-      module_invoke_all('menu_node_delete', $item, $node);
+  if (!empty($node->menu_node_links)) {
+    foreach ($node->menu_node_links as $link) {
+      module_invoke_all('menu_node_delete', $link, $node);
     }
   }
   // Now delete the record.

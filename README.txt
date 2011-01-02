@@ -1,7 +1,7 @@
 // $Id$
 
 Menu Node API
-Manages relationships between node ids and menu items.
+Manages relationships between node ids and menu links.
 
 CONTENTS
 --------
@@ -19,13 +19,13 @@ CONTENTS
 The Menu Node API project fills in one of the "missing tables" in Drupal 6.
 This module does nothing on its own. Instead, it creates and maintains
 a {menu_node} table. This table maps the relationship between a node
-and its menu item (if any).
+and its menu link (if any).
 
 The module requires the optional core Menu module to be enabled.
 
 By itself, this module has no functionality. When nodes are assigned to a
 site menu, records are created to capture that relationship. If the node or
-menu item is deleted, the record is likewise deleted.
+menu link is deleted, the record is likewise deleted.
 
 The module does fire a set of internal hooks when node-based menus are
 created, edited, or deleted.  See section 4 for details.
@@ -66,14 +66,14 @@ and tricks.
 At the core of the module are three simple CRUD hooks. They each pass
 the same arguments:
 
-  -- hook_menu_node_insert($item, $node)
-  -- hook_menu_node_update($item, $node)
-  -- hook_menu_node_delete($item, $node)
+  -- hook_menu_node_insert($link, $node)
+  -- hook_menu_node_update($link, $node)
+  -- hook_menu_node_delete($link, $node)
 
 These functions pass the arguments:
 
-  -- $item
-  The menu item (taken from the {menu_links} table) being
+  -- $link
+  The menu link (taken from the {menu_links} table) being
   acted upon.
   -- $node
   The complete node object being acted upon.
@@ -82,8 +82,8 @@ NOTE: Using menu_get_item() here returns a router item, not the data
 found in {menu_links}. So instead, we load the $item from the {menu_links}
 table directly.
 
-NOTE: Nodes can be assigned to multiple menu items. In these cases, the
-hook should fire once for each menu item.
+NOTE: Nodes can be assigned to multiple menu links. In these cases, the
+hook should fire once for each menu link.
 
 There are additional functions that you may find useful. Check the inline
 Doxygen comments for details.

@@ -27,9 +27,9 @@ function menu_node_test_get() {
 /**
  * Implements hook_menu_node_insert().
  */
-function menu_node_test_menu_node_insert($item, $node) {
+function menu_node_test_menu_node_insert($link, $node) {
   static $i;
-  if (!empty($item) && !empty($node)) {
+  if (!empty($link) && !empty($node)) {
     $i++;
     menu_node_test_set($i);
   }
@@ -38,8 +38,8 @@ function menu_node_test_menu_node_insert($item, $node) {
 /**
  * Implements hook_menu_node_delete().
  */
-function menu_node_test_menu_node_delete($item, $node) {
-  if (!empty($item) && !empty($node)) {
+function menu_node_test_menu_node_delete($link, $node) {
+  if (!empty($link) && !empty($node)) {
     menu_node_test_set('delete');
   }
 }

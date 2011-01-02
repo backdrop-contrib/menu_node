@@ -217,7 +217,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
     foreach ($result as $data) {
       $node = node_load($data->nid);
     }
-    $this->assertTrue(isset($node->menu_node_items), t('menu_node_node_load() fired correctly'));
+    $this->assertTrue(isset($node->menu_node_links), t('menu_node_node_load() fired correctly'));
 
     // Check that hook_menu_node_insert() ran three times.
     $this->assertTrue(menu_node_test_get() == 3, t('hook_menu_node_insert() fired properly.'));
