@@ -2,14 +2,17 @@
 
 CHANGELOG for Menu Node
 
-02-JAN-2010
+03-JAN-2011
+-- Stricter testing for proper API objects.
+
+02-JAN-2011
 -- Better testing. Finds http://drupal.org/node/1012768 bug.
 -- Changes $items to $links in most cases.
 -- Fixes all tests, pending #1012768.
 -- Adds API documentation file.
 -- Corrects static key handling and adds tests for multuple menu items for a single node.
 
-01-JAN-2010
+01-JAN-2011
 -- #1011782. Major D7 upgrade, thanks to Coder module.
 -- Needs tests, and then we can release.
 -- Most tests working. Needs help on delete.

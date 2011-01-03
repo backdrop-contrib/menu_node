@@ -7,6 +7,9 @@
  * Simpletest for Menu Node API.
  */
 
+/**
+ * Utility test class that provides methods for other tests.
+ */
 class MenuNodeAPITestCase extends DrupalWebTestCase {
 
   public function setUp($modules = array()) {
@@ -126,6 +129,9 @@ class MenuNodeAPITestCase extends DrupalWebTestCase {
 
 }
 
+/**
+ * Inherit methods from the parent class and test core module.
+ */
 class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
 
   public function setUp() {
@@ -140,7 +146,12 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
     );
   }
 
-  // Test for basic functions.
+  /**
+   * Tests for basic internal module functions.
+   *
+   * Here we check that the install/uninstall routine works, and
+   * then we test various node and menu link saves.
+   */
   function testMenuNodeAPI() {
 
     // Create some nodes.
@@ -186,6 +197,9 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
 
 }
 
+/**
+ * Inherit methods from the parent class and test API module.
+ */
 class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
   public function setUp() {
@@ -200,6 +214,13 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
     );
   }
 
+  /**
+   * Run tests against the menu_node_test.module.
+   *
+   * That module fires hook which increment a simple counter for
+   * each hook, providing that the data passed to the hook is well-formed.
+   * We simply check that the count is what we expect.
+   */
   function testMenuNodeAPIHooks() {
 
     // Create some nodes.
@@ -242,7 +263,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
     // Check that the delete hook runs once on node link delete.
     menu_node_test_set('no-insert');
     $this->menuNodeAPIDeleteLink(TRUE);
-    $this->assertTrue(menu_node_test_get() == 'delete', t('hook_menu_node_delete() fired properly on node link deletion.'));
+    $this->assertTrue(menu_node_test_get() == 'delete1', t('hook_menu_node_delete() fired properly on node link deletion.'));
 
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
@@ -285,7 +306,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
     $node->menu['enabled'] = FALSE;
     node_save($node);
     // Check that the delete hook ran once.
-    $this->assertTrue(menu_node_test_get() == 'delete1', t('hook_menu_node_delete() fired properly on node save with menu link removed.'));
+    $this->assertTrue(menu_node_test_get() == 'delete2', t('hook_menu_node_delete() fired properly on node save with menu link removed.'));
 
     // Add two menu items to the same node.
     $node->menu['enabled'] = TRUE;
@@ -316,7 +337,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
     // Delete the node and check that the hook runs twice.
     node_delete($node->nid);
-    $this->assertTrue(menu_node_test_get() == 'delete3', t('hook_menu_node_delete() fired properly on node delete with multiple menu links.'));
+    $this->assertTrue(menu_node_test_get() == 'delete4', t('hook_menu_node_delete() fired properly on node delete with multiple menu links.'));
 
   }
 }
