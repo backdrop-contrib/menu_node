@@ -38,10 +38,9 @@ function menu_node_menu_link_delete($link) {
     // TODO: If http://drupal.org/node/1012768 doesn't get in,
     // then we must attach the $link to the node and format as an
     // object, which is what our API expects.
-    /*
     if (empty($node->menu_node_links)) {
       $node->menu_node_links[$link['mlid']] = (object) $link;
-    }*/
+    }
     menu_node_record_delete($node);
   }
 }

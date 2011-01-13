@@ -2,6 +2,10 @@
 
 CHANGELOG for Menu Node
 
+13-JAN-2011
+-- Fixes tests and works around #1012768.
+-- Creates the 7.x.1.0 release.
+
 03-JAN-2011
 -- Stricter testing for proper API objects.
 

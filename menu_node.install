@@ -75,21 +75,19 @@ function menu_node_disable() {
  * Update function to remove book module entries.
  */
 function menu_node_update_6000() {
-  $ret = array();
   if (module_exists('book')) {
     $result = db_query("SELECT mlid, nid FROM {book}");
     foreach ($result as $data) {
       menu_node_delete($data->nid, $data->mlid);
     }
   }
-  return t('Removed book data from the {menu_node} table.') /* $ret */;
+  return t('Removed book data from the {menu_node} table.');
 }
 
 /**
  * Erase bad records from the {menu_node} table.
  */
 function menu_node_update_6001() {
-  $return = array();
   $result = db_query("SELECT mn.mlid, mn.nid FROM {menu_node} mn LEFT JOIN {node} n ON mn.nid = n.nid LEFT JOIN {menu_links} ml ON ml.mlid = mn.mlid WHERE n.nid IS NULL OR ml.mlid IS NULL");
   foreach ($result as $data) {
     db_delete('menu_node')
@@ -97,17 +95,16 @@ function menu_node_update_6001() {
       ->condition('nid', $data->nid)
       ->execute();
   }
-  return t('Erased bad records from the {menu_node} table.') /* $return */;
+  return t('Erased bad records from the {menu_node} table.');
 }
 
 /**
  * Update to the new schema with only mlid as primary key.
  */
 function menu_node_update_6002() {
-  $ret = array();
   db_drop_primary_key('menu_node');
   db_drop_index('menu_node', 'nid');
   db_add_primary_key('menu_node', array('mlid'));
   db_add_index('menu_node', 'nid', array('nid'));
-  return t('Updated primary key and indeces for {menu_node}') /* $ret */;
+  return t('Updated primary key and indeces for {menu_node}');
 }
