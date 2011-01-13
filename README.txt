@@ -31,7 +31,7 @@ The module does fire a set of internal hooks when node-based menus are
 created, edited, or deleted.  See section 4 for details.
 
 For Drupal 7, you might also investigate the following modules, which provide
-similar funcationality:
+similar functionality:
 
   http://drupal.org/project/entity_index
   http://drupal.org/project/menu_link
