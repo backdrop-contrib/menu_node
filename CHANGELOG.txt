@@ -2,6 +2,10 @@
 
 CHANGELOG for Menu Node
 
+16-JAN-2010
+-- #1018692 by bstoppel and matglas86. Catch update condition missed in last update.
+-- Creates the 7.x.1.1 release.
+
 13-JAN-2011
 -- Fixes tests and works around #1012768.
 -- Creates the 7.x.1.0 release.
