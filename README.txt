@@ -1,4 +1,3 @@
-// $Id$
 
 Menu Node API
 Manages relationships between node ids and menu links.

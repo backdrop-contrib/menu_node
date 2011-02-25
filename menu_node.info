@@ -1,4 +1,3 @@
-;  $Id$
 name = Menu Node API
 description = Manages relationships between node ids and menu items.
 dependencies[] = menu
