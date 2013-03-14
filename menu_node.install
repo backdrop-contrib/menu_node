@@ -140,3 +140,11 @@ function menu_node_update_6003() {
 function menu_node_update_6004() {
   return menu_node_update_6002();
 }
+
+/**
+ * Sync the {menu_node} table based on existing menu items.
+ */
+function menu_node_update_7100() {
+  menu_node_disable();
+  menu_node_enable();
+}

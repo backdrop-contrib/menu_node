@@ -24,8 +24,19 @@ function menu_node_menu_link_insert($link) {
  * Implements hook_menu_link_update().
  */
 function menu_node_menu_link_update($link) {
-  if ($node = menu_node_get_node($link['mlid'])) {
-    menu_node_record_save($node, $link);
+  if ($link['router_path'] != 'node/%') {
+    // new link is NOT attached to a node
+    if ($node = menu_node_get_node($link['mlid'])) {
+      // old link WAS attached to a node: menu_node record need to be deleted:
+      menu_node_record_delete($node);
+    }
+  }
+  else {
+    // new link IS attached to a node
+    $nid = str_replace('node/', '', $link['link_path']);
+    if ($node = node_load($nid)) {
+      menu_node_record_save($node, $link);
+    }
   }
 }
 
