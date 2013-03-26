@@ -1,5 +1,6 @@
 <?php
 
+// $Id: menu_node.module,v 1.15 2011/01/13 22:36:05 agentken Exp $
 
 /**
  * @file
@@ -26,9 +27,9 @@ function menu_node_menu_link_insert($link) {
 function menu_node_menu_link_update($link) {
   if ($link['router_path'] != 'node/%') {
     // new link is NOT attached to a node
-    if ($node = menu_node_get_node($link['mlid'])) {
+    if (menu_node_get_node($link['mlid'])) {
       // old link WAS attached to a node: menu_node record need to be deleted:
-      menu_node_record_delete($node);
+      menu_node_record_delete_by_link($link);
     }
   }
   else {
@@ -44,15 +45,7 @@ function menu_node_menu_link_update($link) {
  * Implements hook_menu_link_delete().
  */
 function menu_node_menu_link_delete($link) {
-  if ($node = menu_node_get_node($link['mlid'])) {
-    // TODO: If http://drupal.org/node/1012768 doesn't get in,
-    // then we must attach the $link to the node and format as an
-    // object, which is what our API expects.
-    if (empty($node->menu_node_links)) {
-      $node->menu_node_links[$link['mlid']] = (object) $link;
-    }
-    menu_node_record_delete($node);
-  }
+  menu_node_record_delete_by_link($link);
 }
 
 /**
@@ -85,11 +78,14 @@ function menu_node_node_update($node) {
 }
 
 /**
+ * Needless, menu_node_delete() delete each menu items.
  * Implements hook_node_delete().
  */
+/*
 function menu_node_node_delete($node) {
   menu_node_record_delete($node);
 }
+ */
 
 /**
  * Get the relevant node object for a menu link.
@@ -346,6 +342,7 @@ function menu_node_exists($mlid) {
 }
 
 /**
+ * (Deprecated)
  * Delete a record from {menu_node} and run hook_menu_node_record_delete().
  *
  * We deliberately run the hook before the delete, in case any module
@@ -357,6 +354,21 @@ function menu_node_exists($mlid) {
  *   No return. hook_menu_node_record_delete() is invoked.
  */
 function menu_node_record_delete($node) {
+  menu_node_record_delete_by_node($node);
+}
+
+/**
+ * Delete a record from {menu_node} by nid and run hook_menu_node_record_delete().
+ *
+ * We deliberately run the hook before the delete, in case any module
+ * wishes to run a JOIN on the {menu_node} table.
+ *
+ * @param $node
+ *   The node being deleted.
+ * @return
+ *   No return. hook_menu_node_record_delete() is invoked.
+ */
+function menu_node_record_delete_by_node($node) {
   if (!empty($node->menu_node_links)) {
     foreach ($node->menu_node_links as $link) {
       _menu_node_invoke($node, $link, 'delete');
@@ -365,5 +377,33 @@ function menu_node_record_delete($node) {
   // Now delete the record.
   db_delete('menu_node')
     ->condition('nid', $node->nid)
+    ->execute();
+}
+
+/**
+ * Delete a record from {menu_node} by mlid and run hook_menu_node_record_delete().
+ *
+ * We deliberately run the hook before the delete, in case any module
+ * wishes to run a JOIN on the {menu_node} table.
+ *
+ * @param $link
+ *   The menu link being deleted.
+ * @return
+ *   No return. hook_menu_node_record_delete() is invoked.
+ */
+function menu_node_record_delete_by_link($link) {
+  $link = (object)$link;
+  if ($node = menu_node_get_node($link->mlid)) {
+    // TODO: If http://drupal.org/node/1012768 doesn't get in,
+    // then we must attach the $link to the node and format as an
+    // object, which is what our API expects.
+    if (empty($node->menu_node_links)) {
+      $node->menu_node_links[$link->mlid] = $link;
+    }
+      _menu_node_invoke($node, $link, 'delete');
+  }
+  // Now delete the record.
+  db_delete('menu_node')
+    ->condition('mlid', $link->mlid)
     ->execute();
 }

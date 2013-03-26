@@ -1,6 +1,9 @@
 
 CHANGELOG for Menu Node
 
+26-MAR-2013
+-- #1257254 by DaveJamesMiller, joglin: Fixes improper delete record when menu link delete.
+
 14-MAR-2013
 -- #1018692 by ablondeau, gabriel.achille, ryan.wyse: Fixes synchronization issue when updating a menu link.
 
