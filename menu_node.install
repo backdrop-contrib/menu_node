@@ -44,7 +44,18 @@ function menu_node_schema() {
  * based on existing menu items.
  */
 function menu_node_enable() {
-  $result = db_query("SELECT ml.mlid, ml.link_path FROM {menu_links} ml INNER JOIN {menu_custom} mc ON ml.menu_name = mc.menu_name WHERE ml.link_path <> 'node/%' AND ml.router_path = 'node/%'");
+  $custom_menus = menu_load_all();
+  $custom_menus_names = array_keys($custom_menus);
+  if (empty($custom_menus_names)) {
+    $custom_menus_names[] = '';
+  }
+  $result = db_select('menu_links', 'ml')
+    ->fields('ml', array('mlid', 'link_path'))
+    ->condition('menu_name', $custom_menus_names, 'IN')
+    ->condition('link_path', 'node/%', '<>')
+    ->condition('router_path', 'node/%', '=')
+    ->execute()
+    ->fetchAll();
   foreach ($result as $data) {
     $nid = str_replace('node/', '', $data->link_path);
     // Ensure that we did not grab any bad links accidentally.
