@@ -161,28 +161,30 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
 
     // Rebuild the table by running menu_node_enable().
     menu_node_enable();
+    // Create some nodes.
+    $this->menuNodeAPICreateNodes(10, 3);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 1, t('Module successfully enabled. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 4, t('Module successfully enabled. Found the correct row count in {menu_node}.'));
 
     // Delete a node that is in the menu.
     $this->menuNodeAPIDeleteNode(TRUE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 0, t('Deleted node from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 3, t('Deleted node from the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a node that is not in the menu.
     $this->menuNodeAPIDeleteNode(FALSE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 0, t('Deleted node not in the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 3, t('Deleted node not in the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a link that is a node.
     $this->menuNodeAPIDeleteLink(TRUE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 0, t('Deleted node link from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 2, t('Deleted node link from the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a link that is not a node.
     $this->menuNodeAPIDeleteLink(FALSE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 0, t('Deleted non-node link from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 2, t('Deleted non-node link from the menu. Found the correct row count in {menu_node}.'));
 
   }
 
