@@ -151,7 +151,7 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
     $this->menuNodeAPICreateItems(3);
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 3, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 4, t('Found the correct row count in {menu_node}.'));
 
     // Truncate the table by running menu_node_disable().
     module_load_install('menu_node');
@@ -162,27 +162,27 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
     // Rebuild the table by running menu_node_enable().
     menu_node_enable();
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 3, t('Module successfully enabled. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 1, t('Module successfully enabled. Found the correct row count in {menu_node}.'));
 
     // Delete a node that is in the menu.
     $this->menuNodeAPIDeleteNode(TRUE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 2, t('Deleted node from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 0, t('Deleted node from the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a node that is not in the menu.
     $this->menuNodeAPIDeleteNode(FALSE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 2, t('Deleted node not in the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 0, t('Deleted node not in the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a link that is a node.
     $this->menuNodeAPIDeleteLink(TRUE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 1, t('Deleted node link from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 0, t('Deleted node link from the menu. Found the correct row count in {menu_node}.'));
 
     // Delete a link that is not a node.
     $this->menuNodeAPIDeleteLink(FALSE);
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 1, t('Deleted non-node link from the menu. Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 0, t('Deleted non-node link from the menu. Found the correct row count in {menu_node}.'));
 
   }
 
@@ -210,7 +210,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
     $this->menuNodeAPICreateNodes(3, 3);
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 3, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 4, t('Found the correct row count in {menu_node}.'));
 
     // Check that our data is loaded onto the node.
     $query = db_select('node', 'n')
@@ -233,7 +233,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 3, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 4, t('Found the correct row count in {menu_node}.'));
 
     // Check that the delete hook runs once on node delete.
     $this->menuNodeAPIDeleteNode(TRUE);
@@ -241,7 +241,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 2, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 3, t('Found the correct row count in {menu_node}.'));
 
     // Check that the delete hook runs once on node link delete.
     menu_node_test_set('no-insert');
@@ -250,7 +250,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 1, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 2, t('Found the correct row count in {menu_node}.'));
 
     menu_node_test_set('no-delete');
     // Check that the delete hook does not run on non-node menu items.
@@ -259,7 +259,7 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
     // Check that we have the expected record count.
     $count = db_query("SELECT COUNT(*) FROM {menu_node}")->fetchField();
-    $this->assertTrue($count == 1, t('Found the correct row count in {menu_node}.'));
+    $this->assertTrue($count == 2, t('Found the correct row count in {menu_node}.'));
 
     // Update an existing node and check that the hooks fire.
     $query = db_select('node', 'n')
