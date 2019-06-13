@@ -298,11 +298,11 @@ function menu_node_record_save($node, $link, $hook = 'update') {
   );
   // Save if the record does not exist, otherwise update the existing link
   if (empty($new)) {
-    drupal_write_record('menu_node', $record);
+    backdrop_write_record('menu_node', $record);
     $hook = 'insert';
   }
   else {
-    drupal_write_record('menu_node', $record, 'mlid');
+    backdrop_write_record('menu_node', $record, 'mlid');
   }
   _menu_node_invoke($node, $link, $hook);
 }

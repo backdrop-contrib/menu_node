@@ -9,7 +9,7 @@
 /**
  * Utility test class that provides methods for other tests.
  */
-class MenuNodeAPITestCase extends DrupalWebTestCase {
+class MenuNodeAPITestCase extends BackdropWebTestCase {
 
   public function setUp($modules = array()) {
     $modules = array_merge(array('menu_node'), $modules);
@@ -32,7 +32,7 @@ class MenuNodeAPITestCase extends DrupalWebTestCase {
         'title' => $this->randomName(32),
         'body' => array(LANGUAGE_NONE => array(array($this->randomName(64)))),
       );
-      $this->drupalCreateNode($settings);
+      $this->backdropCreateNode($settings);
     }
     // Assign some of the nodes to the menu.
     $result = db_select('node', 'n')
@@ -96,7 +96,7 @@ class MenuNodeAPITestCase extends DrupalWebTestCase {
     $result = $query->execute();
     foreach ($result as $data) {
       // Ensure we have a fresh copy of the node.
-      // In normal, form-based Drupal, the cache clear handles this, but SimpleTest
+      // In normal, form-based Backdrop, the cache clear handles this, but SimpleTest
       // runs our functions on a single callback.
       $node = node_load($data->nid, NULL, TRUE);
       node_delete($node->nid);

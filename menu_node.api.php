@@ -28,7 +28,7 @@ function hook_menu_node_insert($link, $node) {
     'mlid' => $link->mlid,
     'uid' => $node->uid,
   );
-  drupal_write_record('mytable', $record);
+  backdrop_write_record('mytable', $record);
 }
 
 /**
@@ -53,7 +53,7 @@ function hook_menu_node_update($link, $node) {
     'mlid' => $link->mlid,
     'uid' => $node->uid,
   );
-  drupal_write_record('mytable', $record, array('mlid', 'uid'));
+  backdrop_write_record('mytable', $record, array('mlid', 'uid'));
 }
 
 /**
