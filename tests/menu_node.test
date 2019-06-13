@@ -137,14 +137,6 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
     parent::setUp();
   }
 
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu Node API basic testing',
-      'description' => 'Test mapping of nodes to menu items.',
-      'group' => 'Menu Node',
-    );
-  }
-
   /**
    * Tests for basic internal module functions.
    *
@@ -203,14 +195,6 @@ class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
   public function setUp() {
     parent::setUp(array('menu_node_test'));
-  }
-
-  public static function getInfo() {
-    return array(
-      'name' => 'Menu Node API module hooks',
-      'description' => 'Test Menu Node API hooks.',
-      'group' => 'Menu Node',
-    );
   }
 
   /**

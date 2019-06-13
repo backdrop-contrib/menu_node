@@ -1,0 +1,11 @@
+[MenuNodeAPIBasicTestCase]
+name = Menu Node API basic testing
+description = Test mapping of nodes to menu items.
+group = Menu Node
+file = menu_node.test
+
+[MenuNodeAPIHookTestCase]
+name = Menu Node API module hooks
+description = Test Menu Node API hooks.
+group = Menu Node
+file = menu_node.test
