@@ -1,7 +1,6 @@
 name = Menu Node API
 description = Manages relationships between node ids and menu items.
 dependencies[] = menu
-core = 7.x
-files[] = menu_node.install
-files[] = menu_node.module
-files[] = tests/menu_node.test
+backdrop = 1.x
+type = module
+tags[] = Menus
