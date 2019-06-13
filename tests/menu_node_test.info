@@ -1,5 +1,6 @@
 name = Menu Node API Test 
 description = Support module for Menu Node API testing.
 package = Testing
-core = 7.x
+backdrop = 1.x
 hidden = TRUE
+type = module
