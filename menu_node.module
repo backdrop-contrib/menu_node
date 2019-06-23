@@ -56,7 +56,7 @@ function menu_node_node_load($nodes, $types) {
     return;
   }
   // TODO: Optimize for multiple nodes.
-  foreach($nodes as $node) {
+  foreach ($nodes as $node) {
     // Ensure the menu object is loaded.
     $node->menu_node_links = menu_node_get_links($node->nid);
   }
@@ -392,7 +392,7 @@ function menu_node_record_delete_by_node($node) {
  *   No return. hook_menu_node_record_delete() is invoked.
  */
 function menu_node_record_delete_by_link($link) {
-  $link = (object)$link;
+  $link = (object) $link;
   if ($node = menu_node_get_node($link->mlid)) {
     // TODO: If http://drupal.org/node/1012768 doesn't get in,
     // then we must attach the $link to the node and format as an
@@ -400,7 +400,7 @@ function menu_node_record_delete_by_link($link) {
     if (empty($node->menu_node_links)) {
       $node->menu_node_links[$link->mlid] = $link;
     }
-      _menu_node_invoke($node, $link, 'delete');
+    _menu_node_invoke($node, $link, 'delete');
   }
   // Now delete the record.
   db_delete('menu_node')
