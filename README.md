@@ -26,7 +26,6 @@ Contents
 1. Introduction
 ---------------
 
-The Menu Node API project fills in one of the "missing tables" in Drupal 6.
 This module does nothing on its own. Instead, it creates and maintains
 a {menu_node} table. This table maps the relationship between a node
 and its menu link (if any).
@@ -44,7 +43,8 @@ created, edited, or deleted.  See section 4 for details.
 2. Installation
 ---------------
 
-Install this module using the official Backdrop CMS instructions at
+- The module requires the optional core Menu module to be enabled.
+- Install this module using the official Backdrop CMS instructions at
 https://backdropcms.org/guide/modules
 
 ------------
@@ -58,7 +58,7 @@ The two most obvious uses for this module are:
 
 The purpose, in both cases, is to allow developers and site builders to use
 the menu system as the sole metaphor for a site's structure. For many
-small to mid-size Drupal sites, this approach offers advantages over being
+small to mid-size sites, this approach offers advantages over being
 forced to use a taxonomy-based (or other) solution.
 
 ------------------
