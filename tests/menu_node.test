@@ -133,8 +133,8 @@ class MenuNodeAPITestCase extends BackdropWebTestCase {
  */
 class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
 
-  public function setUp() {
-    parent::setUp();
+  public function setUp($modules = array()) {
+    parent::setUp($modules);
   }
 
   /**
@@ -195,7 +195,7 @@ class MenuNodeAPIBasicTestCase extends MenuNodeAPITestCase {
  */
 class MenuNodeAPIHookTestCase extends MenuNodeAPITestCase {
 
-  public function setUp() {
+  public function setUp($modules = array()) {
     parent::setUp(array('menu_node_test'));
   }
 
