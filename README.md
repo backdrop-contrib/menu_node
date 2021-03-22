@@ -2,7 +2,7 @@ Menu Node API
 =============
 
 Manages relationships between node ids and menu links. By itself, this module
-has no functionality. But it creates and maintainsa {menu_node} table. This
+has no functionality. But it creates and maintains the {menu_node} table. This
 table maps the relationship between a node and its menu link (if any).
 
 
